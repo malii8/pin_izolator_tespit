@@ -1,0 +1,273 @@
+/* Pin İzolatör Tespit Sistemi - Ana CSS Dosyası */
+
+/* Genel Stiller */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Animasyonlar */
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Fotoğraf Önizleme */
+.foto-preview {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.foto-preview:hover {
+    transform: scale(1.05);
+}
+
+/* Durum Badge'leri */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 20px;
+    padding: 0.4rem 0.8rem;
+}
+
+/* İstatistik Kartları */
+.stats-card {
+    border-radius: 15px;
+    padding: 1.5rem;
+    color: white;
+    transition: transform 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+
+.stats-icon {
+    font-size: 2.5rem;
+    opacity: 0.8;
+}
+
+/* Sidebar */
+.sidebar .nav-link {
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    margin: 0.2rem 0;
+}
+
+.sidebar .nav-link:hover {
+    transform: translateX(5px);
+    background-color: #e3f2fd;
+}
+
+.sidebar .nav-link.active {
+    background: linear-gradient(135deg, #2c3e50, #3498db);
+    color: white;
+}
+
+/* Form Stiller */
+.form-control:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+/* Tablo Stiller */
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: scale(1.01);
+}
+
+/* Loading Animasyonu */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive Tasarım */
+@media (max-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+    
+    .stats-card {
+        margin-bottom: 1rem;
+    }
+    
+    .btn-group-sm .btn {
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+/* Fotoğraf Galeri */
+.foto-galeri {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.foto-item {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.foto-item:hover {
+    transform: scale(1.05);
+}
+
+.foto-item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.foto-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    color: white;
+    padding: 1rem 0.5rem 0.5rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* Koordinat Gösterimi */
+.koordinat-info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+/* Analiz Sonucu Kartları */
+.sonuc-karti {
+    border-left: 4px solid;
+    border-radius: 5px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.sonuc-karti.saglam {
+    border-left-color: #28a745;
+    background-color: #d4edda;
+}
+
+.sonuc-karti.hasarli {
+    border-left-color: #dc3545;
+    background-color: #f8d7da;
+}
+
+.sonuc-karti.degismeli {
+    border-left-color: #ffc107;
+    background-color: #fff3cd;
+}
+
+.sonuc-karti.belirsiz {
+    border-left-color: #6c757d;
+    background-color: #e9ecef;
+}
+
+/* Güven Skoru Gösterimi */
+.guven-skoru {
+    display: flex;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.skor-bar {
+    width: 100px;
+    height: 10px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-right: 0.5rem;
+}
+
+.skor-dolgu {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.3s ease;
+}
+
+/* Zaman Çizelgesi */
+.timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, #3498db, #2c3e50);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -0.75rem;
+    top: 0.25rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background-color: #3498db;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Özel Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #3498db, #2c3e50);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #2980b9, #34495e);
+}

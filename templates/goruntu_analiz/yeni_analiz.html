@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-plus me-2"></i>Yeni Analiz Oluştur</h2>
+    <a href="{% url 'goruntu_analiz:anasayfa' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Ana Sayfaya Dön
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-camera me-2"></i>5 Yönden Fotoğraf Analizi</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Fotoğraf Yönergeleri</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6><i class="fas fa-camera text-primary me-1"></i>5 Yön Fotoğrafları</h6>
+                    <ul class="list-unstyled small">
+                        <li><i class="fas fa-arrow-right text-success me-1"></i><strong>Sağ:</strong> Pin izolatörün sağ tarafından</li>
+                        <li><i class="fas fa-arrow-left text-info me-1"></i><strong>Sol:</strong> Pin izolatörün sol tarafından</li>
+                        <li><i class="fas fa-arrow-up text-warning me-1"></i><strong>Ön:</strong> Pin izolatörün ön tarafından</li>
+                        <li><i class="fas fa-arrow-down text-danger me-1"></i><strong>Arka:</strong> Pin izolatörün arka tarafından</li>
+                        <li><i class="fas fa-arrow-circle-up text-secondary me-1"></i><strong>Üst:</strong> Pin izolatörün üst tarafından</li>
+                    </ul>
+                </div>
+                
+                <div class="mb-3">
+                    <h6><i class="fas fa-map-marker-alt text-danger me-1"></i>Koordinat Bilgileri</h6>
+                    <ul class="list-unstyled small">
+                        <li><strong>Enlem:</strong> -90 ile 90 derece arası</li>
+                        <li><strong>Boylam:</strong> -180 ile 180 derece arası</li>
+                        <li><strong>Yükseklik:</strong> Metre cinsinden</li>
+                    </ul>
+                </div>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-lightbulb me-1"></i>
+                    <small>
+                        <strong>İpucu:</strong> Tüm fotoğrafları yükledikten sonra "Analiz Başlat" butonuyla 
+                        makine öğrenmesi analizi başlatabilirsiniz.
+                    </small>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    <small>
+                        <strong>Önemli:</strong> Fotoğraf formatları: JPG, PNG, JPEG desteklenmektedir.
+                        Maksimum dosya boyutu: 10MB
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-brain me-2"></i>Analiz Süreci</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="rounded-circle bg-primary text-white me-2" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                        <small>1</small>
+                    </div>
+                    <small>Fotoğraf Yükleme</small>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <div class="rounded-circle bg-secondary text-white me-2" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                        <small>2</small>
+                    </div>
+                    <small>Koordinat Girişi</small>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <div class="rounded-circle bg-warning text-white me-2" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                        <small>3</small>
+                    </div>
+                    <small>AI Analizi</small>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-success text-white me-2" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                        <small>4</small>
+                    </div>
+                    <small>Sonuç Raporu</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Fotoğraf önizleme fonksiyonu
+    $('input[type="file"]').change(function() {
+        var file = this.files[0];
+        var reader = new FileReader();
+        var preview = $(this).siblings('.foto-preview');
+        
+        if (file) {
+            reader.onload = function(e) {
+                if (preview.length === 0) {
+                    preview = $('<img class="foto-preview mt-2" style="max-width: 100%; max-height: 200px;">');
+                    $(this).parent().append(preview);
+                }
+                preview.attr('src', e.target.result);
+            }.bind(this);
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Form validasyonu
+    $('form').submit(function(e) {
+        var requiredFields = ['gorev_id', 'koordinat_enlem', 'koordinat_boylam', 'yukseklik', 'cekim_zamani'];
+        var hasError = false;
+        
+        requiredFields.forEach(function(field) {
+            if (!$('#id_' + field).val()) {
+                hasError = true;
+                $('#id_' + field).addClass('is-invalid');
+            } else {
+                $('#id_' + field).removeClass('is-invalid');
+            }
+        });
+        
+        if (hasError) {
+            e.preventDefault();
+            alert('Lütfen tüm zorunlu alanları doldurun!');
+        }
+    });
+});
+</script>
+{% endblock %}

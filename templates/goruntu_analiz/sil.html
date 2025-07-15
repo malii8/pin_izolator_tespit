@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Analiz Silme Onayı</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle fa-2x float-start me-3"></i>
+                    <h6>Dikkat! Bu işlem geri alınamaz!</h6>
+                    <p class="mb-0">
+                        Bu analizi silmek istediğinizden emin misiniz? 
+                        Tüm fotoğraflar, analiz sonuçları ve geçmiş kayıtları kalıcı olarak silinecektir.
+                    </p>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-info-circle me-2"></i>Silinecek Analiz Bilgileri</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Görev ID:</strong> {{ analiz.gorev_id }}</li>
+                            <li><strong>Operatör:</strong> {{ analiz.operator.get_full_name|default:analiz.operator.username }}</li>
+                            <li><strong>Oluşturma Zamanı:</strong> {{ analiz.olusturma_zamani|date:"d.m.Y H:i" }}</li>
+                            <li><strong>Koordinat:</strong> {{ analiz.koordinat_str }}</li>
+                            <li><strong>Durum:</strong> 
+                                <span class="badge 
+                                    {% if analiz.analiz_durumu == 'beklemede' %}bg-warning
+                                    {% elif analiz.analiz_durumu == 'isleniyor' %}bg-info
+                                    {% elif analiz.analiz_durumu == 'tamamlandi' %}bg-success
+                                    {% else %}bg-danger{% endif %}">
+                                    {{ analiz.get_analiz_durumu_display }}
+                                </span>
+                            </li>
+                            {% if analiz.tespit_sonucu %}
+                            <li><strong>Sonuç:</strong> 
+                                <span class="badge 
+                                    {% if analiz.tespit_sonucu == 'saglam' %}bg-success
+                                    {% elif analiz.tespit_sonucu == 'hasarli' %}bg-danger
+                                    {% elif analiz.tespit_sonucu == 'degismeli' %}bg-warning
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ analiz.get_tespit_sonucu_display }}
+                                </span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-images me-2"></i>Silinecek Fotoğraflar</h6>
+                        <div class="row">
+                            {% if analiz.foto_sag %}
+                            <div class="col-6 mb-2">
+                                <img src="{{ analiz.foto_sag.url }}" class="img-fluid rounded" alt="Sağ" style="height: 60px; object-fit: cover;">
+                                <small class="d-block text-center">Sağ</small>
+                            </div>
+                            {% endif %}
+                            
+                            {% if analiz.foto_sol %}
+                            <div class="col-6 mb-2">
+                                <img src="{{ analiz.foto_sol.url }}" class="img-fluid rounded" alt="Sol" style="height: 60px; object-fit: cover;">
+                                <small class="d-block text-center">Sol</small>
+                            </div>
+                            {% endif %}
+                            
+                            {% if analiz.foto_on %}
+                            <div class="col-6 mb-2">
+                                <img src="{{ analiz.foto_on.url }}" class="img-fluid rounded" alt="Ön" style="height: 60px; object-fit: cover;">
+                                <small class="d-block text-center">Ön</small>
+                            </div>
+                            {% endif %}
+                            
+                            {% if analiz.foto_arka %}
+                            <div class="col-6 mb-2">
+                                <img src="{{ analiz.foto_arka.url }}" class="img-fluid rounded" alt="Arka" style="height: 60px; object-fit: cover;">
+                                <small class="d-block text-center">Arka</small>
+                            </div>
+                            {% endif %}
+                            
+                            {% if analiz.foto_ust %}
+                            <div class="col-12 mb-2">
+                                <img src="{{ analiz.foto_ust.url }}" class="img-fluid rounded" alt="Üst" style="height: 60px; object-fit: cover;">
+                                <small class="d-block text-center">Üst</small>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if not analiz.tum_fotograflar_yuklendi_mi %}
+                        <div class="alert alert-warning">
+                            <small><i class="fas fa-exclamation-triangle me-1"></i>Tüm fotoğraflar yüklenmemiş</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <a href="{% url 'goruntu_analiz:detay' analiz.pk %}" class="btn btn-secondary me-2">
+                            <i class="fas fa-eye me-1"></i>Detayları Gör
+                        </a>
+                        <a href="{% url 'goruntu_analiz:anasayfa' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Ana Sayfa
+                        </a>
+                    </div>
+                    
+                    <div>
+                        <button type="button" class="btn btn-outline-danger me-2" onclick="history.back()">
+                            <i class="fas fa-times me-1"></i>İptal
+                        </button>
+                        <form method="post" class="d-inline" id="deleteForm">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger" id="confirmDeleteBtn">
+                                <i class="fas fa-trash me-1"></i>Evet, Sil
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4 border-warning">
+            <div class="card-header bg-warning">
+                <h6 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Alternatif Seçenekler</h6>
+            </div>
+            <div class="card-body">
+                <p>Analizi silmek yerine şu seçenekleri de değerlendirebilirsiniz:</p>
+                <ul>
+                    <li><strong>Düzenleme:</strong> Analiz bilgilerini güncelleyebilirsiniz</li>
+                    <li><strong>Durum Değiştirme:</strong> Analiz durumunu "Hatalı" olarak işaretleyebilirsiniz</li>
+                    <li><strong>Yedekleme:</strong> Analizi silmeden önce bilgileri kaydedin</li>
+                </ul>
+                
+                <div class="mt-3">
+                    <a href="{% url 'goruntu_analiz:duzenle' analiz.pk %}" class="btn btn-warning me-2">
+                        <i class="fas fa-edit me-1"></i>Düzenle
+                    </a>
+                    <button class="btn btn-info" onclick="window.print()">
+                        <i class="fas fa-print me-1"></i>Yazdır/Kaydet
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Silme onayı
+    $('#deleteForm').submit(function(e) {
+        e.preventDefault();
+        
+        if (confirm('Son kez soruyoruz: Bu analizi kalıcı olarak silmek istediğinizden EMİN misiniz?\n\nBu işlem GERİ ALINAMAZ!')) {
+            // İkinci onay
+            var gorevId = '{{ analiz.gorev_id }}';
+            var userInput = prompt('Onaylamak için görev ID\'sini yazın: ' + gorevId);
+            
+            if (userInput === gorevId) {
+                // Butonu devre dışı bırak ve loading göster
+                $('#confirmDeleteBtn').prop('disabled', true)
+                                    .html('<i class="fas fa-spinner fa-spin me-1"></i>Siliniyor...');
+                
+                // Formu gönder
+                this.submit();
+            } else if (userInput !== null) {
+                alert('Görev ID yanlış girildi. Silme işlemi iptal edildi.');
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

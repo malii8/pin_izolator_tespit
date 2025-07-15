@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-edit me-2"></i>Analiz Düzenle - {{ analiz.gorev_id }}</h2>
+    <div>
+        <a href="{% url 'goruntu_analiz:detay' analiz.pk %}" class="btn btn-secondary me-2">
+            <i class="fas fa-eye me-1"></i>Detayları Gör
+        </a>
+        <a href="{% url 'goruntu_analiz:anasayfa' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Ana Sayfa
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Analiz Bilgilerini Düzenle</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Mevcut Bilgiler</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>Görev ID:</strong> {{ analiz.gorev_id }}</p>
+                <p><strong>Operatör:</strong> {{ analiz.operator.get_full_name|default:analiz.operator.username }}</p>
+                <p><strong>Oluşturma:</strong> {{ analiz.olusturma_zamani|date:"d.m.Y H:i" }}</p>
+                <p><strong>Son Güncelleme:</strong> {{ analiz.guncelleme_zamani|date:"d.m.Y H:i" }}</p>
+                
+                <hr>
+                
+                <p><strong>Durum:</strong> 
+                    <span class="badge 
+                        {% if analiz.analiz_durumu == 'beklemede' %}bg-warning
+                        {% elif analiz.analiz_durumu == 'isleniyor' %}bg-info
+                        {% elif analiz.analiz_durumu == 'tamamlandi' %}bg-success
+                        {% else %}bg-danger{% endif %}">
+                        {{ analiz.get_analiz_durumu_display }}
+                    </span>
+                </p>
+                
+                {% if analiz.tespit_sonucu %}
+                <p><strong>Sonuç:</strong> 
+                    <span class="badge 
+                        {% if analiz.tespit_sonucu == 'saglam' %}bg-success
+                        {% elif analiz.tespit_sonucu == 'hasarli' %}bg-danger
+                        {% elif analiz.tespit_sonucu == 'degismeli' %}bg-warning
+                        {% else %}bg-secondary{% endif %}">
+                        {{ analiz.get_tespit_sonucu_display }}
+                    </span>
+                </p>
+                {% endif %}
+                
+                {% if analiz.guven_skoru %}
+                <p><strong>Güven Skoru:</strong> %{{ analiz.guven_skoru|floatformat:1 }}</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-images me-2"></i>Mevcut Fotoğraflar</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% if analiz.foto_sag %}
+                    <div class="col-6 mb-2">
+                        <img src="{{ analiz.foto_sag.url }}" class="img-fluid rounded" alt="Sağ">
+                        <small class="d-block text-center mt-1">Sağ</small>
+                    </div>
+                    {% endif %}
+                    
+                    {% if analiz.foto_sol %}
+                    <div class="col-6 mb-2">
+                        <img src="{{ analiz.foto_sol.url }}" class="img-fluid rounded" alt="Sol">
+                        <small class="d-block text-center mt-1">Sol</small>
+                    </div>
+                    {% endif %}
+                    
+                    {% if analiz.foto_on %}
+                    <div class="col-6 mb-2">
+                        <img src="{{ analiz.foto_on.url }}" class="img-fluid rounded" alt="Ön">
+                        <small class="d-block text-center mt-1">Ön</small>
+                    </div>
+                    {% endif %}
+                    
+                    {% if analiz.foto_arka %}
+                    <div class="col-6 mb-2">
+                        <img src="{{ analiz.foto_arka.url }}" class="img-fluid rounded" alt="Arka">
+                        <small class="d-block text-center mt-1">Arka</small>
+                    </div>
+                    {% endif %}
+                    
+                    {% if analiz.foto_ust %}
+                    <div class="col-12 mb-2">
+                        <img src="{{ analiz.foto_ust.url }}" class="img-fluid rounded" alt="Üst">
+                        <small class="d-block text-center mt-1">Üst</small>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if not analiz.tum_fotograflar_yuklendi_mi %}
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    <small>Henüz tüm fotoğraflar yüklenmemiş</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Dikkat</h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle me-1"></i>
+                    <strong>Not:</strong> Analiz durumu ve sonuçlarını değiştirirken dikkatli olun. 
+                    Bu değişiklikler sistem geçmişinde kaydedilecektir.
+                </div>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-lightbulb me-1"></i>
+                    <strong>İpucu:</strong> Fotoğrafları değiştirmek için ilgili alanları kullanın. 
+                    Mevcut fotoğraflar korunacaktır.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Fotoğraf önizleme
+    $('input[type="file"]').change(function() {
+        var file = this.files[0];
+        var reader = new FileReader();
+        var fieldName = $(this).attr('name');
+        
+        if (file) {
+            reader.onload = function(e) {
+                // Önizleme div'i oluştur veya güncelle
+                var previewId = 'preview_' + fieldName;
+                var existingPreview = $('#' + previewId);
+                
+                if (existingPreview.length === 0) {
+                    var previewHtml = '<div id="' + previewId + '" class="mt-2">' +
+                                    '<img src="' + e.target.result + '" class="img-fluid rounded" style="max-height: 150px;">' +
+                                    '<small class="d-block text-center mt-1 text-success">Yeni fotoğraf önizleme</small>' +
+                                    '</div>';
+                    $(this).parent().append(previewHtml);
+                } else {
+                    existingPreview.find('img').attr('src', e.target.result);
+                }
+            }.bind(this);
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Form gönderme onayı
+    $('form').submit(function(e) {
+        if (!confirm('Değişiklikleri kaydetmek istediğinizden emin misiniz?')) {
+            e.preventDefault();
+        }
+    });
+    
+    // Güven skoru validasyonu
+    $('#id_guven_skoru').on('input', function() {
+        var value = parseFloat($(this).val());
+        if (value < 0 || value > 100) {
+            $(this).addClass('is-invalid');
+            if ($(this).siblings('.invalid-feedback').length === 0) {
+                $(this).after('<div class="invalid-feedback">Güven skoru 0-100 arasında olmalıdır.</div>');
+            }
+        } else {
+            $(this).removeClass('is-invalid');
+            $(this).siblings('.invalid-feedback').remove();
+        }
+    });
+});
+</script>
+{% endblock %}

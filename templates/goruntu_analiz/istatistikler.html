@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-chart-bar me-2"></i>İstatistikler</h2>
+    <a href="{% url 'goruntu_analiz:anasayfa' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Ana Sayfa
+    </a>
+</div>
+
+<!-- Genel İstatistikler -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stats-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="text-center">
+                <i class="fas fa-chart-line stats-icon mb-2"></i>
+                <h2 class="mb-0">{{ toplam_analiz }}</h2>
+                <p class="mb-0">Toplam Analiz</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div class="text-center">
+                <i class="fas fa-users stats-icon mb-2"></i>
+                <h2 class="mb-0">{{ operatorler }}</h2>
+                <p class="mb-0">Aktif Operatör</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stats-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <div class="text-center">
+                <i class="fas fa-check-circle stats-icon mb-2"></i>
+                <h2 class="mb-0">{{ tamamlandi }}</h2>
+                <p class="mb-0">Tamamlanan</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stats-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+            <div class="text-center">
+                <i class="fas fa-exclamation-triangle stats-icon mb-2"></i>
+                <h2 class="mb-0">{{ hasarli }}</h2>
+                <p class="mb-0">Hasarlı Tespit</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <!-- Analiz Durumları -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Analiz Durumları</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="p-3 border rounded">
+                            <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                            <h4 class="text-warning">{{ beklemede }}</h4>
+                            <small class="text-muted">Beklemede</small>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="p-3 border rounded">
+                            <i class="fas fa-spinner fa-2x text-info mb-2"></i>
+                            <h4 class="text-info">{{ isleniyor }}</h4>
+                            <small class="text-muted">İşleniyor</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 border rounded">
+                            <i class="fas fa-check fa-2x text-success mb-2"></i>
+                            <h4 class="text-success">{{ tamamlandi }}</h4>
+                            <small class="text-muted">Tamamlandı</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 border rounded">
+                            <i class="fas fa-times fa-2x text-danger mb-2"></i>
+                            <h4 class="text-danger">{{ hatali }}</h4>
+                            <small class="text-muted">Hatalı</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Durum Yüzdeleri -->
+                <div class="mt-4">
+                    <h6>Durum Dağılımı</h6>
+                    {% if toplam_analiz > 0 %}
+                    <div class="progress mb-2" style="height: 25px;">
+                        <div class="progress-bar bg-warning" style="width: {% widthratio beklemede toplam_analiz 100 %}%">
+                            Beklemede: %{% widthratio beklemede toplam_analiz 100 %}
+                        </div>
+                        <div class="progress-bar bg-info" style="width: {% widthratio isleniyor toplam_analiz 100 %}%">
+                            İşleniyor: %{% widthratio isleniyor toplam_analiz 100 %}
+                        </div>
+                        <div class="progress-bar bg-success" style="width: {% widthratio tamamlandi toplam_analiz 100 %}%">
+                            Tamamlandı: %{% widthratio tamamlandi toplam_analiz 100 %}
+                        </div>
+                        <div class="progress-bar bg-danger" style="width: {% widthratio hatali toplam_analiz 100 %}%">
+                            Hatalı: %{% widthratio hatali toplam_analiz 100 %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <!-- Tespit Sonuçları -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-search me-2"></i>Tespit Sonuçları</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="p-3 border rounded bg-light-success">
+                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                            <h4 class="text-success">{{ saglam }}</h4>
+                            <small class="text-muted">Sağlam</small>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="p-3 border rounded bg-light-danger">
+                            <i class="fas fa-exclamation-triangle fa-2x text-danger mb-2"></i>
+                            <h4 class="text-danger">{{ hasarli }}</h4>
+                            <small class="text-muted">Hasarlı</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 border rounded bg-light-warning">
+                            <i class="fas fa-exchange-alt fa-2x text-warning mb-2"></i>
+                            <h4 class="text-warning">{{ degismeli }}</h4>
+                            <small class="text-muted">Değişmeli</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 border rounded bg-light-secondary">
+                            <i class="fas fa-question-circle fa-2x text-secondary mb-2"></i>
+                            <h4 class="text-secondary">{{ belirsiz }}</h4>
+                            <small class="text-muted">Belirsiz</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sonuç Yüzdeleri -->
+                <div class="mt-4">
+                    <h6>Sonuç Dağılımı</h6>
+                    {% if tamamlandi > 0 %}
+                    <div class="progress mb-2" style="height: 25px;">
+                        <div class="progress-bar bg-success" style="width: {% widthratio saglam tamamlandi 100 %}%">
+                            Sağlam: %{% widthratio saglam tamamlandi 100 %}
+                        </div>
+                        <div class="progress-bar bg-danger" style="width: {% widthratio hasarli tamamlandi 100 %}%">
+                            Hasarlı: %{% widthratio hasarli tamamlandi 100 %}
+                        </div>
+                        <div class="progress-bar bg-warning" style="width: {% widthratio degismeli tamamlandi 100 %}%">
+                            Değişmeli: %{% widthratio degismeli tamamlandi 100 %}
+                        </div>
+                        <div class="progress-bar bg-secondary" style="width: {% widthratio belirsiz tamamlandi 100 %}%">
+                            Belirsiz: %{% widthratio belirsiz tamamlandi 100 %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Önemli Metrikler -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>Sistem Performans Metrikleri</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="text-center p-3">
+                            <i class="fas fa-percentage fa-2x text-primary mb-2"></i>
+                            <h4 class="text-primary">
+                                {% if toplam_analiz > 0 %}
+                                    %{% widthratio tamamlandi toplam_analiz 100 %}
+                                {% else %}
+                                    %0
+                                {% endif %}
+                            </h4>
+                            <small class="text-muted">Tamamlanma Oranı</small>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="text-center p-3">
+                            <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
+                            <h4 class="text-success">
+                                {% if tamamlandi > 0 %}
+                                    %{% widthratio saglam tamamlandi 100 %}
+                                {% else %}
+                                    %0
+                                {% endif %}
+                            </h4>
+                            <small class="text-muted">Sağlam Oranı</small>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="text-center p-3">
+                            <i class="fas fa-exclamation fa-2x text-danger mb-2"></i>
+                            <h4 class="text-danger">
+                                {% if tamamlandi > 0 %}
+                                    %{% widthratio hasarli tamamlandi 100 %}
+                                {% else %}
+                                    %0
+                                {% endif %}
+                            </h4>
+                            <small class="text-muted">Hasar Tespit Oranı</small>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="text-center p-3">
+                            <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                            <h4 class="text-warning">
+                                {% if toplam_analiz > 0 %}
+                                    %{% widthratio beklemede toplam_analiz 100 %}
+                                {% else %}
+                                    %0
+                                {% endif %}
+                            </h4>
+                            <small class="text-muted">Bekleyen İşlem Oranı</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if toplam_analiz == 0 %}
+<div class="text-center mt-5">
+    <i class="fas fa-chart-bar fa-5x text-muted mb-4"></i>
+    <h4 class="text-muted">Henüz istatistik verisi bulunmuyor</h4>
+    <p class="text-muted">İlk analizinizi oluşturup istatistikleri görmeye başlayın.</p>
+    <a href="{% url 'goruntu_analiz:yeni_analiz' %}" class="btn btn-primary btn-lg">
+        <i class="fas fa-plus me-1"></i>İlk Analizi Oluştur
+    </a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.bg-light-success { background-color: rgba(40, 167, 69, 0.1) !important; }
+.bg-light-danger { background-color: rgba(220, 53, 69, 0.1) !important; }
+.bg-light-warning { background-color: rgba(255, 193, 7, 0.1) !important; }
+.bg-light-secondary { background-color: rgba(108, 117, 125, 0.1) !important; }
+
+.progress-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+</style>
+{% endblock %}

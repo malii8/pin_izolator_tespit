@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-home me-2"></i>Ana Sayfa</h2>
+    <a href="{% url 'goruntu_analiz:yeni_analiz' %}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i>Yeni Analiz
+    </a>
+</div>
+
+<!-- İstatistik Kartları -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stats-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0">{{ toplam_analiz }}</h3>
+                    <p class="mb-0">Toplam Analiz</p>
+                </div>
+                <i class="fas fa-chart-line stats-icon"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0">{{ beklemede }}</h3>
+                    <p class="mb-0">Beklemede</p>
+                </div>
+                <i class="fas fa-clock stats-icon"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stats-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0">{{ tamamlandi }}</h3>
+                    <p class="mb-0">Tamamlandı</p>
+                </div>
+                <i class="fas fa-check-circle stats-icon"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stats-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0">{{ hasarli }}</h3>
+                    <p class="mb-0">Hasarlı</p>
+                </div>
+                <i class="fas fa-exclamation-triangle stats-icon"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Arama ve Filtreleme -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Arama</label>
+                <input type="text" name="arama" class="form-control" 
+                       placeholder="Görev ID, operatör adı..." value="{{ arama }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Durum</label>
+                <select name="durum" class="form-control">
+                    <option value="">Tüm Durumlar</option>
+                    <option value="beklemede" {% if durum == 'beklemede' %}selected{% endif %}>Beklemede</option>
+                    <option value="isleniyor" {% if durum == 'isleniyor' %}selected{% endif %}>İşleniyor</option>
+                    <option value="tamamlandi" {% if durum == 'tamamlandi' %}selected{% endif %}>Tamamlandı</option>
+                    <option value="hatali" {% if durum == 'hatali' %}selected{% endif %}>Hatalı</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-secondary me-2">
+                    <i class="fas fa-search me-1"></i>Ara
+                </button>
+                <a href="{% url 'goruntu_analiz:anasayfa' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-1"></i>Temizle
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Analiz Listesi -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Son Analizler</h5>
+    </div>
+    <div class="card-body p-0">
+        {% if analizler %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Görev ID</th>
+                            <th>Operatör</th>
+                            <th>Koordinat</th>
+                            <th>Çekim Zamanı</th>
+                            <th>Durum</th>
+                            <th>Sonuç</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for analiz in analizler %}
+                        <tr>
+                            <td>
+                                <strong>{{ analiz.gorev_id }}</strong>
+                            </td>
+                            <td>
+                                <i class="fas fa-user me-1"></i>
+                                {{ analiz.operator.get_full_name|default:analiz.operator.username }}
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    {{ analiz.koordinat_str }}
+                                </small>
+                            </td>
+                            <td>{{ analiz.cekim_zamani|date:"d.m.Y H:i" }}</td>
+                            <td>
+                                {% if analiz.analiz_durumu == 'beklemede' %}
+                                    <span class="status-badge" style="background-color: #ffc107; color: black;">
+                                        <i class="fas fa-clock me-1"></i>Beklemede
+                                    </span>
+                                {% elif analiz.analiz_durumu == 'isleniyor' %}
+                                    <span class="status-badge" style="background-color: #17a2b8; color: white;">
+                                        <i class="fas fa-spinner me-1"></i>İşleniyor
+                                    </span>
+                                {% elif analiz.analiz_durumu == 'tamamlandi' %}
+                                    <span class="status-badge" style="background-color: #28a745; color: white;">
+                                        <i class="fas fa-check me-1"></i>Tamamlandı
+                                    </span>
+                                {% else %}
+                                    <span class="status-badge" style="background-color: #dc3545; color: white;">
+                                        <i class="fas fa-times me-1"></i>Hatalı
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if analiz.tespit_sonucu %}
+                                    {% if analiz.tespit_sonucu == 'saglam' %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Sağlam
+                                        </span>
+                                    {% elif analiz.tespit_sonucu == 'hasarli' %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>Hasarlı
+                                        </span>
+                                    {% elif analiz.tespit_sonucu == 'degismeli' %}
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fas fa-exchange-alt me-1"></i>Değişmeli
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-question me-1"></i>Belirsiz
+                                        </span>
+                                    {% endif %}
+                                    {% if analiz.guven_skoru %}
+                                        <small class="text-muted d-block">%{{ analiz.guven_skoru|floatformat:1 }}</small>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'goruntu_analiz:detay' analiz.pk %}" 
+                                       class="btn btn-outline-primary" title="Detaylar">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'goruntu_analiz:duzenle' analiz.pk %}" 
+                                       class="btn btn-outline-secondary" title="Düzenle">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% if analiz.analiz_durumu == 'beklemede' and analiz.tum_fotograflar_yuklendi_mi %}
+                                        <button class="btn btn-outline-success analiz-baslat-btn" 
+                                                data-id="{{ analiz.pk }}" title="Analiz Başlat">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Sayfalama -->
+            {% if analizler.has_other_pages %}
+                <div class="d-flex justify-content-center mt-3">
+                    <nav>
+                        <ul class="pagination">
+                            {% if analizler.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?sayfa={{ analizler.previous_page_number }}{% if arama %}&arama={{ arama }}{% endif %}{% if durum %}&durum={{ durum }}{% endif %}">Önceki</a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in analizler.paginator.page_range %}
+                                {% if analizler.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?sayfa={{ num }}{% if arama %}&arama={{ arama }}{% endif %}{% if durum %}&durum={{ durum }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if analizler.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?sayfa={{ analizler.next_page_number }}{% if arama %}&arama={{ arama }}{% endif %}{% if durum %}&durum={{ durum }}{% endif %}">Sonraki</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Henüz analiz bulunamadı</h5>
+                <p class="text-muted">İlk analizinizi oluşturmak için "Yeni Analiz" butonuna tıklayın.</p>
+                <a href="{% url 'goruntu_analiz:yeni_analiz' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Yeni Analiz Oluştur
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Analiz başlat butonu
+    $('.analiz-baslat-btn').click(function() {
+        var analizId = $(this).data('id');
+        var btn = $(this);
+        
+        if(confirm('Analiz işlemini başlatmak istediğinizden emin misiniz?')) {
+            btn.prop('disabled', true);
+            btn.html('<i class="fas fa-spinner fa-spin"></i>');
+            
+            $.post('{% url "goruntu_analiz:baslat" 0 %}'.replace('0', analizId))
+                .done(function(data) {
+                    if(data.success) {
+                        alert('Analiz başarıyla tamamlandı!\nSonuç: ' + data.sonuc + '\nGüven Skoru: %' + data.skor.toFixed(1));
+                        location.reload();
+                    } else {
+                        alert('Hata: ' + data.message);
+                        btn.prop('disabled', false);
+                        btn.html('<i class="fas fa-play"></i>');
+                    }
+                })
+                .fail(function() {
+                    alert('Bir hata oluştu!');
+                    btn.prop('disabled', false);
+                    btn.html('<i class="fas fa-play"></i>');
+                });
+        }
+    });
+});
+</script>
+{% endblock %}

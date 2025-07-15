@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-eye me-2"></i>Analiz Detayı - {{ analiz.gorev_id }}</h2>
+    <div>
+        <a href="{% url 'goruntu_analiz:duzenle' analiz.pk %}" class="btn btn-secondary me-2">
+            <i class="fas fa-edit me-1"></i>Düzenle
+        </a>
+        <a href="{% url 'goruntu_analiz:anasayfa' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Ana Sayfa
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Temel Bilgiler -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Temel Bilgiler</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Görev ID:</strong> {{ analiz.gorev_id }}</p>
+                        <p><strong>Operatör:</strong> 
+                            <i class="fas fa-user me-1"></i>
+                            {{ analiz.operator.get_full_name|default:analiz.operator.username }}
+                        </p>
+                        <p><strong>Çekim Zamanı:</strong> {{ analiz.cekim_zamani|date:"d.m.Y H:i" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Oluşturma:</strong> {{ analiz.olusturma_zamani|date:"d.m.Y H:i" }}</p>
+                        <p><strong>Son Güncelleme:</strong> {{ analiz.guncelleme_zamani|date:"d.m.Y H:i" }}</p>
+                        <p><strong>Yükseklik:</strong> {{ analiz.yukseklik }} m</p>
+                    </div>
+                </div>
+                
+                {% if analiz.aciklama %}
+                <div class="mt-3">
+                    <strong>Açıklama:</strong>
+                    <p class="text-muted">{{ analiz.aciklama }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Koordinat Bilgileri -->
+        <div class="koordinat-info">
+            <h6><i class="fas fa-map-marker-alt me-2"></i>Koordinat Bilgileri</h6>
+            <div class="row">
+                <div class="col-md-4">
+                    <strong>Enlem:</strong><br>
+                    <span class="h5">{{ analiz.koordinat_enlem }}°</span>
+                </div>
+                <div class="col-md-4">
+                    <strong>Boylam:</strong><br>
+                    <span class="h5">{{ analiz.koordinat_boylam }}°</span>
+                </div>
+                <div class="col-md-4">
+                    <strong>Yükseklik:</strong><br>
+                    <span class="h5">{{ analiz.yukseklik }} m</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fotoğraf Galerisi -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-images me-2"></i>5 Yönden Fotoğraflar</h5>
+            </div>
+            <div class="card-body">
+                {% if fotograflar %}
+                    <div class="foto-galeri">
+                        {% for foto in fotograflar %}
+                        <div class="foto-item">
+                            <img src="{{ foto.url }}" alt="{{ foto.yon }} Fotoğraf" class="img-fluid">
+                            <div class="foto-label">{{ foto.yon }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-camera fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Henüz fotoğraf yüklenmemiş</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Durum ve Sonuç -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>Analiz Durumu</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Durum:</strong><br>
+                    {% if analiz.analiz_durumu == 'beklemede' %}
+                        <span class="status-badge" style="background-color: #ffc107; color: black;">
+                            <i class="fas fa-clock me-1"></i>Beklemede
+                        </span>
+                    {% elif analiz.analiz_durumu == 'isleniyor' %}
+                        <span class="status-badge" style="background-color: #17a2b8; color: white;">
+                            <i class="fas fa-spinner me-1"></i>İşleniyor
+                        </span>
+                    {% elif analiz.analiz_durumu == 'tamamlandi' %}
+                        <span class="status-badge" style="background-color: #28a745; color: white;">
+                            <i class="fas fa-check me-1"></i>Tamamlandı
+                        </span>
+                    {% else %}
+                        <span class="status-badge" style="background-color: #dc3545; color: white;">
+                            <i class="fas fa-times me-1"></i>Hatalı
+                        </span>
+                    {% endif %}
+                </div>
+
+                {% if analiz.tespit_sonucu %}
+                <div class="mb-3">
+                    <strong>Tespit Sonucu:</strong><br>
+                    <div class="sonuc-karti {{ analiz.tespit_sonucu }}">
+                        {% if analiz.tespit_sonucu == 'saglam' %}
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Sağlam</strong>
+                        {% elif analiz.tespit_sonucu == 'hasarli' %}
+                            <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                            <strong>Hasarlı</strong>
+                        {% elif analiz.tespit_sonucu == 'degismeli' %}
+                            <i class="fas fa-exchange-alt text-warning me-2"></i>
+                            <strong>Değişmeli</strong>
+                        {% else %}
+                            <i class="fas fa-question-circle text-secondary me-2"></i>
+                            <strong>Belirsiz</strong>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if analiz.guven_skoru %}
+                <div class="mb-3">
+                    <strong>Güven Skoru:</strong><br>
+                    <div class="guven-skoru">
+                        <div class="skor-bar">
+                            <div class="skor-dolgu" style="width: {{ analiz.guven_skoru }}%; 
+                                {% if analiz.guven_skoru >= 80 %}background-color: #28a745;
+                                {% elif analiz.guven_skoru >= 60 %}background-color: #ffc107;
+                                {% else %}background-color: #dc3545;{% endif %}">
+                            </div>
+                        </div>
+                        <span class="fw-bold">%{{ analiz.guven_skoru|floatformat:1 }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if analiz.analiz_durumu == 'beklemede' and analiz.tum_fotograflar_yuklendi_mi %}
+                <button class="btn btn-success w-100 analiz-baslat-btn" data-id="{{ analiz.pk }}">
+                    <i class="fas fa-play me-1"></i>Analiz Başlat
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tespit Detayları -->
+        {% if tespit_detaylari %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-search me-2"></i>Tespit Detayları</h6>
+            </div>
+            <div class="card-body">
+                {% for detay in tespit_detaylari %}
+                <div class="mb-3 p-2 border rounded">
+                    <strong>{{ detay.get_foto_yon_display }}</strong><br>
+                    <small class="text-muted">
+                        {% if detay.nesne_tespit_edildi %}
+                            <i class="fas fa-check text-success me-1"></i>Nesne tespit edildi
+                        {% else %}
+                            <i class="fas fa-times text-danger me-1"></i>Nesne tespit edilmedi
+                        {% endif %}
+                    </small><br>
+                    {% if detay.hasar_tespit_edildi %}
+                        <small class="text-danger">
+                            <i class="fas fa-exclamation-triangle me-1"></i>Hasar tespit edildi
+                        </small>
+                    {% endif %}
+                    {% if detay.tespit_skoru %}
+                        <br><small>Skor: %{{ detay.tespit_skoru|floatformat:1 }}</small>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- İşlem Geçmişi -->
+        {% if gecmis %}
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-history me-2"></i>İşlem Geçmişi</h6>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    {% for islem in gecmis %}
+                    <div class="timeline-item">
+                        <strong>{{ islem.islem }}</strong><br>
+                        <small class="text-muted">
+                            {% if islem.kullanici %}
+                                {{ islem.kullanici.username }} - 
+                            {% endif %}
+                            {{ islem.islem_zamani|date:"d.m.Y H:i" }}
+                        </small>
+                        {% if islem.aciklama %}
+                            <br><small class="text-muted">{{ islem.aciklama }}</small>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Analiz başlat butonu
+    $('.analiz-baslat-btn').click(function() {
+        var analizId = $(this).data('id');
+        var btn = $(this);
+        
+        if(confirm('Analiz işlemini başlatmak istediğinizden emin misiniz?')) {
+            btn.prop('disabled', true);
+            btn.html('<i class="fas fa-spinner fa-spin me-1"></i>Analiz Yapılıyor...');
+            
+            $.post('{% url "goruntu_analiz:baslat" 0 %}'.replace('0', analizId))
+                .done(function(data) {
+                    if(data.success) {
+                        alert('Analiz başarıyla tamamlandı!\nSonuç: ' + data.sonuc + '\nGüven Skoru: %' + data.skor.toFixed(1));
+                        location.reload();
+                    } else {
+                        alert('Hata: ' + data.message);
+                        btn.prop('disabled', false);
+                        btn.html('<i class="fas fa-play me-1"></i>Analiz Başlat');
+                    }
+                })
+                .fail(function() {
+                    alert('Bir hata oluştu!');
+                    btn.prop('disabled', false);
+                    btn.html('<i class="fas fa-play me-1"></i>Analiz Başlat');
+                });
+        }
+    });
+
+    // Fotoğraf modal
+    $('.foto-item img').click(function() {
+        var imgSrc = $(this).attr('src');
+        var modalHtml = `
+            <div class="modal fade" id="fotoModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Fotoğraf Önizleme</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <img src="${imgSrc}" class="img-fluid" alt="Fotoğraf">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        if ($('#fotoModal').length) {
+            $('#fotoModal').remove();
+        }
+        
+        $('body').append(modalHtml);
+        $('#fotoModal').modal('show');
+    });
+});
+</script>
+{% endblock %}
